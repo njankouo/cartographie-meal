@@ -186,7 +186,7 @@ jobs:
 
             # 4. Récupération des images (web, celery, db, redis)
             echo "4. Téléchargement des images..."
-            docker compose pull
+            docker compose pull --quiet
 
             # 5. Migrations Django (avec la NOUVELLE image)
             echo "5. Application des migrations..."
