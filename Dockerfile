@@ -20,4 +20,4 @@ RUN python manage.py collectstatic --noinput
 
 EXPOSE 8006
 
-CMD ["gunicorn", "Opera_CTN.wsgi:application", "--bind", "0.0.0.0:8006", "--workers", "2", "--timeout", "120"]
+CMD ["gunicorn", "cartographie_meal.wsgi:application", "--bind", "0.0.0.0:8006", "--workers", "2", "--timeout", "120"]
