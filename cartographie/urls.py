@@ -60,7 +60,7 @@ urlpatterns = [
 
     path('zone-intervention/', views.zone_intervention, name='zone-intervention'),
 
-    path('expert/partage/<uuid:token>/', views.ProfilExpertPublic, name='profil_expert_public'),
+    path('expert/partage/<uuid:token>/', views.ProfilExpertPublic, name='profil_expert_public')
 
 
 ]
