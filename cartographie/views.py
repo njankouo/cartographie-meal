@@ -1153,3 +1153,16 @@ def actualite(request):
 def logout_admin(request):
     logout(request)
     return redirect('/')
+
+
+def ProfilExpertPublic(request, token):
+
+  expert = get_object_or_404(Personnel, token=token)
+
+  context = {
+      'expert': expert,
+     
+  }
+
+ 
+  return render(request, 'webpages/profil-expert-public.html', context)

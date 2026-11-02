@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils.text import slugify
+import uuid
 # Create your models here.
 class ProfilMeal(models.Model):
     code = models.CharField(max_length=255, null=True)
@@ -38,6 +39,7 @@ class DisponibilityType(models.Model):
     def __str__(self):
         return self.intitule
 class Personnel(models.Model):
+    token = models.UUIDField(default=uuid.uuid4, null=True, blank=True)
     nom	= models.CharField(max_length=128,blank=True,null=True)
     prenom = models.CharField(max_length=128,blank=True,null=True)
     mail = models.CharField(max_length=128,blank=True,null=True)
