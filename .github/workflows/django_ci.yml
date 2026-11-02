@@ -1,4 +1,3 @@
-
 name: Django CI/CD (GHCR & Docker)
 
 on:
@@ -136,6 +135,7 @@ jobs:
         env:
           GHCR_USER: ${{ secrets.GHCR_USER }}
           GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          IMAGE_TAG: sha-${{ github.sha }}
 
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -143,7 +143,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           command_timeout: 10m
 
-          envs: GHCR_USER,GHCR_READ_TOKEN
+          envs: GHCR_USER,GHCR_READ_TOKEN,IMAGE_TAG
 
           script: |
             set -Eeuo pipefail
@@ -154,9 +154,14 @@ jobs:
 
             cd /home/Cartographie-Meal
 
-            # 1. Mise à jour du dépôt
+            # IMAGE_TAG est lu par docker-compose.yml
+            export IMAGE_TAG
+            echo "Image à déployer : tag ${IMAGE_TAG}"
+
+            # 1. Mise à jour du dépôt (docker-compose.yml, .env.example, etc.)
             echo "1. Mise à jour Git..."
             git pull origin main
+            echo "Commit déployé : $(git rev-parse --short HEAD)"
 
             # 2. Vérification des identifiants
             echo "2. Vérification des identifiants GHCR..."
@@ -175,21 +180,20 @@ jobs:
 
             # 3. Authentification GHCR
             echo "3. Connexion à GHCR..."
-
             printf '%s' "$GHCR_READ_TOKEN" | docker login ghcr.io \
               --username "$GHCR_USER" \
               --password-stdin
 
-            # 4. Récupération de l'image
-            echo "4. Téléchargement de la nouvelle image..."
+            # 4. Récupération des images (web, celery, db, redis)
+            echo "4. Téléchargement des images..."
             docker compose pull
 
-            # 5. Migrations Django
+            # 5. Migrations Django (avec la NOUVELLE image)
             echo "5. Application des migrations..."
             docker compose run --rm web \
               python manage.py migrate --noinput
 
-            # 6. Démarrage des services
+            # 6. Redémarrage : web et celery sont recréés car l'image a changé
             echo "6. Démarrage des conteneurs..."
             docker compose up -d --remove-orphans
 
@@ -198,9 +202,11 @@ jobs:
             docker compose exec -T web \
               python manage.py collectstatic --noinput
 
-            # 8. Vérification des conteneurs
+            # 8. Vérification
             echo "8. Vérification des services..."
             docker compose ps
+            docker inspect -f 'web    -> {{.Config.Image}} (créé le {{.Created}})' meal-afrique-app-web
+            docker inspect -f 'celery -> {{.Config.Image}} (créé le {{.Created}})' meal-afrique-app-celery
 
             # 9. Nettoyage
             echo "9. Nettoyage des anciennes images..."

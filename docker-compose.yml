@@ -3,7 +3,7 @@ name: meal-afrique
 services:
 
   web:
-    build: .
+    image: ghcr.io/njankouo/cartographie-meal:${IMAGE_TAG:-latest}   # image publiée par le CI
     container_name: meal-afrique-app-web
     env_file:
       - .env
@@ -48,13 +48,11 @@ services:
       - meal_afrique_network
 
   celery:
-    build: .
+    image: ghcr.io/njankouo/cartographie-meal:${IMAGE_TAG:-latest}   # même image que web
     container_name: meal-afrique-app-celery
     command: celery -A Opera_CTN worker -l info
     env_file:
       - .env
-    volumes:
-      - .:/app:z
     working_dir: /app
     restart: unless-stopped
     depends_on:
