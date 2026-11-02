@@ -188,33 +188,12 @@ jobs:
             echo "4. Téléchargement des images..."
             docker compose pull --quiet
 
-            # 5. Migrations Django (avec la NOUVELLE image)
-            echo "5. Application des migrations..."
-            docker compose run --rm web \
-              python manage.py migrate --noinput
+            # 5. Migrations + fichiers statiques AVANT redémarrage
+            #    (un seul conteneur temporaire : évite le pic mémoire au démarrage)
+            echo "5. Migrations et fichiers statiques..."
+            docker compose run --rm web sh -c \
+              "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
 
-            # 6. Redémarrage : web et celery sont recréés car l'image a changé
+            # 6. Redémarrage : web et celery recréés sur la nouvelle image
             echo "6. Démarrage des conteneurs..."
-            docker compose up -d --remove-orphans
-
-            # 7. Fichiers statiques
-            echo "7. Collecte des fichiers statiques..."
-            docker compose exec -T web \
-              python manage.py collectstatic --noinput
-
-            # 8. Vérification
-            echo "8. Vérification des services..."
-            docker compose ps
-            docker inspect -f 'web    -> {{.Config.Image}} (créé le {{.Created}})' meal-afrique-app-web
-            docker inspect -f 'celery -> {{.Config.Image}} (créé le {{.Created}})' meal-afrique-app-celery
-
-            # 9. Nettoyage
-            echo "9. Nettoyage des anciennes images..."
-            docker image prune -f
-
-            # 10. Déconnexion GHCR
-            docker logout ghcr.io
-
-            echo "======================================"
-            echo "DEPLOIEMENT TERMINE AVEC SUCCES"
-            echo "======================================"
+            docker compose up -d
