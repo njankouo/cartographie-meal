@@ -141,7 +141,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 10m
+          command_timeout: 30m
 
           envs: GHCR_USER,GHCR_READ_TOKEN,IMAGE_TAG
 
