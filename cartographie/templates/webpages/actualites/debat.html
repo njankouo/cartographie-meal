@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if debat %}Débat N°{{ debat.numero }}{% else %}Nouveau débat{% endif %} · MEAL Afrique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      navy: { DEFAULT: '#14284B', ink: '#0E1C36', soft: '#EAF0F8' },
+      gold: { DEFAULT: '#E3B23C', ink: '#8A6310', soft: '#FFF8E6' },
+      paper: '#F6F3EC', ligne: '#E2DDD2', encre: '#1B1F27', gris: '#5B6373',
+      ok: { DEFAULT: '#1F7A4D', soft: '#E5F3EB' }, warn: { DEFAULT: '#8F4A0E', soft: '#FBEBDD' }, rouge: { DEFAULT: '#A3311F', soft: '#FBEAE7' }
+    },
+    fontFamily: { serif: ['Fraunces', 'Georgia', 'serif'], sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] }
+  } }
+}
+</script>
+</head>
+<body class="bg-paper font-sans text-[14px] leading-normal text-encre antialiased">
+{% url 'gestion-editoriale' as u_gestion %}{% url 'admin-actualites' as u_actu %}{% url 'admin-mail-groupe' as u_mail %}{% url 'admin-synchronisations' as u_sync %}
+
+<!-- ═════════ BARRE DU HAUT ═════════ -->
+<header class="bg-navy text-white">
+  <div class="mx-auto flex min-h-16 max-w-[1320px] flex-wrap items-center gap-x-7 gap-y-2 px-6 py-2">
+    <a href="{{ u_gestion }}" class="flex items-center gap-2.5 text-white no-underline">
+      <span class="grid h-[34px] w-[34px] place-items-center rounded-lg bg-gold font-mono text-xs font-bold text-navy-ink">MA</span>
+      <span class="font-serif text-[19px] font-bold">MEAL Afrique</span>
+      <span class="font-mono text-[10.5px] uppercase tracking-[.12em] text-gold">Espace admin</span>
+    </a>
+    <nav aria-label="Menu admin" class="flex flex-1 flex-wrap gap-1">
+      <a href="{{ u_gestion }}" aria-current="page" class="rounded-lg bg-white/10 px-3.5 py-2.5 font-semibold text-white">Actualités &amp; débats</a>
+      {% if u_actu %}<a href="{{ u_actu }}" class="rounded-lg px-3.5 py-2.5 text-[#D7DEEA] hover:bg-white/10 hover:text-white">Saisie des actualités</a>{% endif %}
+      {% if u_mail %}<a href="{{ u_mail }}" class="rounded-lg px-3.5 py-2.5 text-[#D7DEEA] hover:bg-white/10 hover:text-white">Communication</a>{% endif %}
+      {% if u_sync %}<a href="{{ u_sync }}" class="rounded-lg px-3.5 py-2.5 text-[#D7DEEA] hover:bg-white/10 hover:text-white">Données</a>{% endif %}
+    </nav>
+    {% if operaplus_url %}
+    <a href="{{ operaplus_url }}" target="_blank" rel="noopener" class="inline-flex min-h-10 items-center gap-2 rounded-full border-[1.5px] border-gold px-3.5 text-[13px] font-semibold text-gold hover:bg-gold hover:text-navy-ink">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>
+      Ouvrir OPERAPLUS
+    </a>
+    {% endif %}
+  </div>
+</header>
+
+<main class="mx-auto max-w-[1320px] px-6 pb-16 pt-5">
+
+  <nav aria-label="Fil d'Ariane" class="flex flex-wrap gap-2 text-[12.5px] text-gris">
+    <a href="{{ u_gestion }}" class="font-semibold text-navy">Actualités &amp; débats</a><span aria-hidden="true">›</span>
+    <span aria-current="page" class="font-semibold text-encre">{% if debat %}Débat N°{{ debat.numero }}{% else %}Nouveau débat{% endif %}</span>
+  </nav>
+
+  <div class="my-5 flex flex-wrap items-end justify-between gap-5">
+    <div class="max-w-[720px]">
+      <span class="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-gold-ink">Débats numérotés</span>
+      <h1 class="mb-2 mt-1.5 font-serif text-[32px] font-bold leading-tight text-navy sm:text-[40px]">{% if debat %}Débat N°{{ debat.numero }}{% else %}Nouveau débat{% endif %}</h1>
+      <p class="leading-relaxed text-gris">{% if debat %}Modifiez le débat puis gérez ses <b class="text-encre">contributions</b> plus bas.{% else %}Le numéro est proposé automatiquement (dernier numéro + 1). Après l'enregistrement, vous pourrez rattacher des actualités comme <b class="text-encre">contributions</b>.{% endif %}</p>
+    </div>
+    {% if debat %}
+    <a href="{{ u_gestion }}?debat={{ debat.pk }}" class="inline-flex min-h-[46px] items-center rounded-[10px] border-[1.5px] border-navy bg-white px-[18px] font-bold text-navy hover:bg-navy-soft">Voir ses contributions dans la liste</a>
+    {% endif %}
+  </div>
+
+  {% if messages %}
+  <div class="mb-5 grid gap-2" role="status">
+    {% for message in messages %}
+    <div class="flex items-center justify-between gap-3 rounded-[10px] border px-4 py-3 font-semibold {% if message.tags == 'success' %}border-[#BFE0CC] bg-ok-soft text-[#14532F]{% elif message.tags == 'error' %}border-[#F0D2CC] bg-rouge-soft text-[#7A2214]{% else %}border-ligne bg-white{% endif %}">
+      <span>{{ message }}</span>
+      <button type="button" aria-label="Fermer" onclick="this.parentNode.remove()" class="h-8 w-8 text-base">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="flex flex-wrap items-start gap-6">
+
+    <div class="flex min-w-0 flex-[999_1_560px] flex-col gap-[18px]">
+
+      <form id="form-debat" method="post" enctype="multipart/form-data" novalidate class="flex flex-col gap-[18px]"
+            action="{% if debat %}{% url 'debat-modifier' debat.pk %}{% else %}{% url 'debat-nouveau' %}{% endif %}">
+        {% csrf_token %}
+
+        {% if erreurs.general %}
+        <div role="alert" class="rounded-[10px] border border-[#F0D2CC] bg-rouge-soft px-4 py-3.5 font-semibold text-[#7A2214]">{{ erreurs.general }}</div>
+        {% endif %}
+
+        <!-- 1. Identité -->
+        <section class="rounded-[14px] border border-ligne bg-white p-[22px]">
+          <h2 class="mb-4 font-serif text-[19px] font-bold text-navy">1. Identité du débat</h2>
+
+          <div class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="id_numero" class="text-[13px] font-bold">Numéro <span class="text-rouge">*</span></label>
+              <div class="flex overflow-hidden rounded-[10px] border-[1.5px] {% if erreurs.numero %}border-rouge{% else %}border-navy{% endif %}">
+                <span class="flex items-center bg-navy px-3 font-mono text-sm font-bold text-gold">N°</span>
+                <input id="id_numero" type="number" name="numero" min="1" step="1" value="{{ v.numero }}" required{% if erreurs.numero %} aria-invalid="true" aria-describedby="err-numero"{% endif %} class="min-h-12 w-full min-w-0 px-3 font-mono text-xl font-bold text-navy focus:outline-none">
+              </div>
+              {% if erreurs.numero %}<span id="err-numero" class="text-[12.5px] font-semibold text-rouge">{{ erreurs.numero }}</span>
+              {% else %}<small class="text-xs text-gris">Unique.{% if dernier_numero %} Dernier utilisé : N°{{ dernier_numero }}.{% endif %}</small>{% endif %}
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="id_statut" class="text-[13px] font-bold">Statut</label>
+              <select id="id_statut" name="statut" class="min-h-[51px] w-full rounded-[10px] border-[1.5px] border-ligne bg-white px-3 font-semibold focus:border-navy focus:outline-none">
+                {% for code, libelle in statuts %}
+                <option value="{{ code }}"{% if v.statut == code %} selected{% endif %}>{{ libelle }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="id_rubrique" class="text-[13px] font-bold">Rubrique principale</label>
+              <select id="id_rubrique" name="rubrique" class="min-h-[51px] w-full rounded-[10px] border-[1.5px] border-ligne bg-white px-3 focus:border-navy focus:outline-none">
+                <option value="">Toutes rubriques</option>
+                {% for r in rubriques %}
+                <option value="{{ r.pk }}"{% if v.rubrique == r.pk %} selected{% endif %}>{{ r.nom|default:"(sans nom)" }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="id_sous_rubrique" class="text-[13px] font-bold">Sous-rubrique</label>
+              <select id="id_sous_rubrique" name="sous_rubrique" class="min-h-[51px] w-full rounded-[10px] border-[1.5px] bg-white px-3 focus:border-navy focus:outline-none {% if erreurs.sous_rubrique %}border-rouge{% else %}border-ligne{% endif %}">
+                <option value="">Aucune sous-rubrique</option>
+                {% for s in sous_rubriques %}
+                <option value="{{ s.pk }}" data-rubrique="{{ s.rubrique_id|default:'' }}"{% if v.sous_rubrique == s.pk %} selected{% endif %}>{{ s.nom|default:"(sans nom)" }}{% if s.rubrique %} — {{ s.rubrique.nom }}{% endif %}</option>
+                {% endfor %}
+              </select>
+              {% if erreurs.sous_rubrique %}<span class="text-[12.5px] font-semibold text-rouge">{{ erreurs.sous_rubrique }}</span>
+              {% else %}<small class="text-xs text-gris">La liste suit la rubrique choisie.</small>{% endif %}
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-col gap-1.5">
+            <label for="id_theme" class="text-[13px] font-bold">Thème (question posée) <span class="text-rouge">*</span></label>
+            <input id="id_theme" type="text" name="theme" maxlength="255" value="{{ v.theme }}" required placeholder="Ex. : Quelle place pour les communautés dans la définition des indicateurs ?"{% if erreurs.theme %} aria-invalid="true" aria-describedby="err-theme"{% endif %} class="min-h-12 w-full rounded-[10px] border-[1.5px] px-3 text-[15px] focus:border-navy focus:outline-none {% if erreurs.theme %}border-rouge{% else %}border-ligne{% endif %}">
+            {% if erreurs.theme %}<span id="err-theme" class="text-[12.5px] font-semibold text-rouge">{{ erreurs.theme }}</span>{% endif %}
+          </div>
+
+          <div class="mt-4 flex flex-col gap-1.5">
+            <label for="id_description" class="text-[13px] font-bold">Texte d'introduction</label>
+            <textarea id="id_description" name="description" rows="6" placeholder="Présentez l'enjeu du débat, le contexte et les questions de relance…" class="w-full resize-y rounded-[10px] border-[1.5px] border-ligne p-3 leading-relaxed focus:border-navy focus:outline-none">{{ v.description }}</textarea>
+          </div>
+        </section>
+
+        <!-- 2. Calendrier et visuel -->
+        <section class="rounded-[14px] border border-ligne bg-white p-[22px]">
+          <h2 class="mb-4 font-serif text-[19px] font-bold text-navy">2. Calendrier et visuel</h2>
+          <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="id_date_ouverture" class="text-[13px] font-bold">Date d'ouverture</label>
+              <input id="id_date_ouverture" type="date" name="date_ouverture" value="{{ v.date_ouverture }}" class="min-h-12 w-full rounded-[10px] border-[1.5px] px-3 focus:border-navy focus:outline-none {% if erreurs.date_ouverture %}border-rouge{% else %}border-ligne{% endif %}">
+              {% if erreurs.date_ouverture %}<span class="text-[12.5px] font-semibold text-rouge">{{ erreurs.date_ouverture }}</span>{% endif %}
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="id_date_cloture" class="text-[13px] font-bold">Date de clôture</label>
+              <input id="id_date_cloture" type="date" name="date_cloture" value="{{ v.date_cloture }}" class="min-h-12 w-full rounded-[10px] border-[1.5px] px-3 focus:border-navy focus:outline-none {% if erreurs.date_cloture %}border-rouge{% else %}border-ligne{% endif %}">
+              {% if erreurs.date_cloture %}<span class="text-[12.5px] font-semibold text-rouge">{{ erreurs.date_cloture }}</span>{% endif %}
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="id_image" class="text-[13px] font-bold">Image</label>
+              <input id="id_image" type="file" name="image" accept="image/*" class="min-h-12 w-full rounded-[10px] border-[1.5px] border-dashed bg-[#FBFAF6] p-2.5 text-[13px] file:mr-3 file:rounded-lg file:border-0 file:bg-navy-soft file:px-3 file:py-1.5 file:font-bold file:text-navy {% if erreurs.image %}border-rouge{% else %}border-[#CFC8B8]{% endif %}">
+              {% if erreurs.image %}<span class="text-[12.5px] font-semibold text-rouge">{{ erreurs.image }}</span>{% else %}<small class="text-xs text-gris">JPG, PNG ou WebP · 10 Mo maximum.</small>{% endif %}
+              {% if debat.image %}
+              <div class="mt-2 flex items-center gap-2.5 text-[13px]">
+                <img src="{{ debat.image.url }}" alt="" class="h-12 w-[72px] rounded-md object-cover">
+                <label class="flex items-center gap-1.5"><input type="checkbox" name="supprimer_image" class="h-4 w-4 accent-rouge"> Retirer l'image</label>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </section>
+
+        <!-- Barre d'enregistrement -->
+        <div class="sticky bottom-0 z-10 flex flex-wrap items-center gap-3 rounded-[14px] border border-ligne bg-white px-5 py-3.5 shadow-[0_-6px_18px_rgba(20,40,75,.06)]">
+          <label class="flex flex-[1_1_240px] items-center gap-2.5 font-semibold">
+            <input type="checkbox" name="is_public"{% if v.is_public %} checked{% endif %} class="h-5 w-5 accent-ok"> Publier le débat sur le site
+          </label>
+          <a href="{{ u_gestion }}" class="inline-flex min-h-[46px] items-center rounded-[10px] border-[1.5px] border-ligne bg-white px-[18px] font-semibold hover:bg-paper">Annuler</a>
+          <button type="submit" class="min-h-[46px] rounded-[10px] bg-navy px-[22px] font-bold text-white hover:bg-navy-ink">{% if debat %}Enregistrer{% else %}Créer le débat{% endif %}</button>
+        </div>
+      </form>
+
+      <!-- 3. Contributions (formulaires séparés : un <form> ne peut pas en contenir un autre) -->
+      <section id="contributions" aria-labelledby="t-contrib" class="rounded-[14px] border border-ligne bg-white p-[22px]">
+        <div class="mb-3.5 flex flex-wrap items-center justify-between gap-2.5">
+          <h2 id="t-contrib" class="font-serif text-[19px] font-bold text-navy">3. Contributions rattachées</h2>
+          {% if debat %}<span class="font-mono text-[11px] text-gris">{{ contributions|length }} actualité{{ contributions|length|pluralize }}</span>{% endif %}
+        </div>
+
+        {% if debat %}
+        <form method="post" action="{% url 'debat-rattacher' debat.pk %}" class="mb-3.5 flex flex-wrap gap-2">
+          {% csrf_token %}
+          <label for="id_actualite" class="sr-only">Actualité à rattacher</label>
+          <select id="id_actualite" name="actualite" required class="min-h-11 min-w-0 flex-[1_1_260px] rounded-[10px] border-[1.5px] border-ligne bg-white px-3 focus:border-navy focus:outline-none">
+            <option value="">Choisir une actualité à rattacher…</option>
+            {% for a in disponibles %}
+            <option value="{{ a.pk }}">{{ a.intitule|default:"Sans titre"|truncatechars:80 }}{% if a.rubrique %} — {{ a.rubrique.nom }}{% endif %}{% if a.debat %} (déjà au débat N°{{ a.debat.numero }}){% endif %}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="min-h-11 rounded-[10px] bg-navy-soft px-4 font-bold text-navy hover:bg-[#DCE5F2]">Rattacher</button>
+        </form>
+
+        <ul class="flex flex-col gap-2">
+          {% for a in contributions %}
+          <li class="flex flex-wrap items-center gap-2.5 rounded-[10px] border border-ligne px-3.5 py-3">
+            {% if a.rubrique %}<span class="bg-gold px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[.1em] text-navy-ink">{{ a.rubrique.nom }}</span>{% else %}<span class="bg-[#EEF0F3] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[.1em] text-gris">Sans rubrique</span>{% endif %}
+            <a href="{% if u_actu %}{{ u_actu }}?modifier={{ a.pk }}#formulaire{% else %}#{% endif %}" class="min-w-0 flex-[1_1_220px] font-semibold text-encre hover:underline">{{ a.intitule|default:"Sans titre" }}</a>
+            <small class="text-xs text-gris">{{ a.date|date:"j M Y" }}{% if not a.is_public %} · non publiée{% endif %}</small>
+            <form method="post" action="{% url 'debat-retirer' debat.pk a.pk %}">
+              {% csrf_token %}
+              <button type="submit" aria-label="Retirer « {{ a.intitule }} » du débat" title="Retirer du débat" class="grid h-10 w-10 place-items-center rounded-[9px] border border-[#F0D2CC] bg-white text-rouge hover:bg-rouge-soft">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </button>
+            </form>
+          </li>
+          {% empty %}
+          <li class="py-1 text-[12.5px] text-gris">Aucune contribution pour l'instant : choisissez une actualité ci-dessus.</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-[12.5px] text-gris">Enregistrez d'abord le débat : vous pourrez ensuite lui rattacher des actualités.</p>
+        {% endif %}
+      </section>
+
+      {% if debat %}
+      <section class="rounded-[14px] border border-[#F0D2CC] bg-white p-[22px]">
+        <h2 class="mb-2 font-serif text-[19px] font-bold text-navy">Supprimer le débat</h2>
+        <p class="mb-3 text-[13px] text-gris">Les {{ contributions|length }} actualité{{ contributions|length|pluralize }} rattachée{{ contributions|length|pluralize }} restent dans les actualités, sans débat.</p>
+        <form method="post" action="{% url 'debat-supprimer' debat.pk %}" onsubmit="return confirm('Supprimer définitivement le débat N°{{ debat.numero }} ?')">
+          {% csrf_token %}
+          <button type="submit" class="min-h-[46px] rounded-[10px] border-[1.5px] border-[#F0D2CC] bg-white px-[18px] font-bold text-rouge hover:bg-rouge-soft">Supprimer le débat N°{{ debat.numero }}</button>
+        </form>
+      </section>
+      {% endif %}
+    </div>
+
+    <!-- ═════════ APERÇU ═════════ -->
+    <aside class="flex min-w-0 flex-[1_1_320px] flex-col gap-[18px] lg:sticky lg:top-4">
+      <section aria-label="Aperçu sur le site" class="overflow-hidden rounded-[14px] border border-ligne bg-white">
+        <div class="border-b border-ligne px-4 py-2.5 font-mono text-[10.5px] font-bold uppercase tracking-[.12em] text-gris">Aperçu sur le site</div>
+        <div id="ap-visuel" class="flex h-40 items-end bg-navy bg-cover bg-center p-4"{% if debat.image %} style="background-image:url('{{ debat.image.url }}')"{% endif %}>
+          <b class="font-serif text-[64px] font-bold leading-[.9] text-gold [text-shadow:0_2px_12px_rgba(0,0,0,.35)]">N°<span id="ap-num">{{ v.numero }}</span></b>
+        </div>
+        <div class="px-[18px] pb-5 pt-4">
+          <span class="inline-block bg-gold px-2 py-1 font-mono text-[10px] font-bold tracking-[.12em] text-navy-ink">DÉBAT N°<span id="ap-num2">{{ v.numero }}</span> · <span id="ap-statut">{% for code, libelle in statuts %}{% if v.statut == code %}{{ libelle|upper }}{% endif %}{% endfor %}</span></span>
+          <span id="ap-classement" class="mt-1.5 block font-mono text-[10px] font-bold uppercase tracking-[.1em] text-navy"></span>
+          <p id="ap-theme" class="mt-2.5 font-serif text-[21px] font-semibold leading-snug text-navy">{{ v.theme|default:"Le thème du débat s'affichera ici" }}</p>
+          <small class="mt-2 block text-[13px] text-gris">{% if debat %}{{ contributions|length }} contribution{{ contributions|length|pluralize }}{% else %}Aucune contribution{% endif %}</small>
+        </div>
+      </section>
+      <section class="rounded-[14px] border border-[#EBD7A3] bg-gold-soft px-[18px] py-4">
+        <span class="font-mono text-[10.5px] font-bold uppercase tracking-[.12em] text-gold-ink">À la clôture</span>
+        <p class="mt-1.5 text-[13px] leading-relaxed">Passez le statut à « Clôturé » une fois le débat terminé : sa synthèse pourra rejoindre les leçons apprises d'OPERAPLUS.</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script>
+/* Aperçu en direct : simple mise à jour de l'affichage */
+(function () {
+  var num = document.getElementById('id_numero'),
+      theme = document.getElementById('id_theme'),
+      statut = document.getElementById('id_statut'),
+      image = document.getElementById('id_image');
+  function maj() {
+    var n = (num.value || '').trim() || '…';
+    document.getElementById('ap-num').textContent = n;
+    document.getElementById('ap-num2').textContent = n;
+    document.getElementById('ap-theme').textContent = theme.value.trim() || "Le thème du débat s'affichera ici";
+    document.getElementById('ap-statut').textContent = statut.options[statut.selectedIndex].text.toUpperCase();
+  }
+  num.addEventListener('input', maj);
+  theme.addEventListener('input', maj);
+  statut.addEventListener('change', maj);
+
+  /* Sous-rubriques : n'afficher que celles de la rubrique choisie */
+  var rub = document.getElementById('id_rubrique'),
+      sous = document.getElementById('id_sous_rubrique');
+  function filtrerSous() {
+    var r = rub.value;
+    Array.prototype.forEach.call(sous.options, function (o) {
+      if (!o.value) return;
+      var ok = !r || o.getAttribute('data-rubrique') === r;
+      o.hidden = !ok; o.disabled = !ok;
+      if (!ok && o.selected) sous.value = '';
+    });
+    classement();
+  }
+  function classement() {
+    var t = [];
+    if (rub.value) t.push(rub.options[rub.selectedIndex].text);
+    if (sous.value) t.push(sous.options[sous.selectedIndex].text.split(' — ')[0]);
+    document.getElementById('ap-classement').textContent = t.join(' › ');
+  }
+  rub.addEventListener('change', filtrerSous);
+  sous.addEventListener('change', function () {
+    /* choisir une sous-rubrique sélectionne aussi sa rubrique */
+    var o = sous.options[sous.selectedIndex];
+    if (o && o.getAttribute('data-rubrique') && !rub.value) { rub.value = o.getAttribute('data-rubrique'); filtrerSous(); }
+    classement();
+  });
+  filtrerSous();
+  image.addEventListener('change', function () {
+    var f = image.files && image.files[0];
+    if (f && f.type.indexOf('image/') === 0) {
+      document.getElementById('ap-visuel').style.backgroundImage = 'url(' + URL.createObjectURL(f) + ')';
+    }
+  });
+})();
+</script>
+</body>
+</html>

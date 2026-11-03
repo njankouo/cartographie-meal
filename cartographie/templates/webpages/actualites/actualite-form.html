@@ -1,1 +1,329 @@
-push actualities
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actualités &amp; débats · MEAL Afrique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: { extend: {
+    colors: {
+      navy: { DEFAULT: '#14284B', ink: '#0E1C36', soft: '#EAF0F8' },
+      gold: { DEFAULT: '#E3B23C', ink: '#8A6310', soft: '#FFF8E6' },
+      paper: '#F6F3EC', ligne: '#E2DDD2', encre: '#1B1F27', gris: '#5B6373',
+      ok: { DEFAULT: '#1F7A4D', soft: '#E5F3EB' }, warn: { DEFAULT: '#8F4A0E', soft: '#FBEBDD' }, rouge: { DEFAULT: '#A3311F', soft: '#FBEAE7' }
+    },
+    fontFamily: { serif: ['Fraunces', 'Georgia', 'serif'], sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'], mono: ['"JetBrains Mono"', 'monospace'] }
+  } }
+}
+</script>
+</head>
+<body class="bg-paper font-sans text-[14px] leading-normal text-encre antialiased">
+{% url 'gestion-editoriale' as u_gestion %}{% url 'admin-actualites' as u_actu %}{% url 'admin-mail-groupe' as u_mail %}{% url 'admin-synchronisations' as u_sync %}
+
+<!-- ═════════ BARRE DU HAUT ═════════ -->
+<header class="bg-navy text-white">
+  <div class="mx-auto flex min-h-16 max-w-[1320px] flex-wrap items-center gap-x-7 gap-y-2 px-6 py-2">
+    <a href="{{ u_gestion }}" class="flex items-center gap-2.5 text-white no-underline">
+      <span class="grid h-[34px] w-[34px] place-items-center rounded-lg bg-gold font-mono text-xs font-bold text-navy-ink">MA</span>
+      <span class="font-serif text-[19px] font-bold">MEAL Afrique</span>
+      <span class="font-mono text-[10.5px] uppercase tracking-[.12em] text-gold">Espace admin</span>
+    </a>
+    <nav aria-label="Menu admin" class="flex flex-1 flex-wrap gap-1">
+      <a href="{{ u_gestion }}" aria-current="page" class="rounded-lg bg-white/10 px-3.5 py-2.5 font-semibold text-white">Actualités &amp; débats</a>
+      {% if u_actu %}<a href="{{ u_actu }}" class="rounded-lg px-3.5 py-2.5 text-[#D7DEEA] hover:bg-white/10 hover:text-white">Saisie des actualités</a>{% endif %}
+      {% if u_mail %}<a href="{{ u_mail }}" class="rounded-lg px-3.5 py-2.5 text-[#D7DEEA] hover:bg-white/10 hover:text-white">Communication</a>{% endif %}
+      {% if u_sync %}<a href="{{ u_sync }}" class="rounded-lg px-3.5 py-2.5 text-[#D7DEEA] hover:bg-white/10 hover:text-white">Données</a>{% endif %}
+    </nav>
+    {% if operaplus_url %}
+    <a href="{{ operaplus_url }}" target="_blank" rel="noopener" class="inline-flex min-h-10 items-center gap-2 rounded-full border-[1.5px] border-gold px-3.5 text-[13px] font-semibold text-gold hover:bg-gold hover:text-navy-ink">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>
+      Ouvrir OPERAPLUS
+    </a>
+    {% endif %}
+  </div>
+</header>
+
+<main class="mx-auto max-w-[1320px] px-6 pb-16 pt-5">
+
+  <nav aria-label="Fil d'Ariane" class="flex flex-wrap gap-2 text-[12.5px] text-gris">
+    <a href="{% url 'admin:index' %}" class="font-semibold text-navy">Espace admin</a><span aria-hidden="true">›</span>
+    <span aria-current="page" class="font-semibold text-encre">Actualités &amp; débats</span>
+  </nav>
+
+  <!-- En-tête -->
+  <div class="my-5 flex flex-wrap items-end justify-between gap-5">
+    <div class="max-w-[720px]">
+      <span class="font-mono text-[11px] font-bold uppercase tracking-[.14em] text-gold-ink">Contenus éditoriaux</span>
+      <h1 class="mb-2 mt-1.5 font-serif text-[32px] font-bold leading-tight text-navy sm:text-[40px]">Actualités &amp; débats</h1>
+      <p class="leading-relaxed text-gris">Chaque actualité est classée dans une <b class="text-encre">rubrique</b> puis une <b class="text-encre">sous-rubrique</b>. Elle peut aussi être une <b class="text-encre">contribution</b> à un débat numéroté.</p>
+    </div>
+    <div class="flex w-full flex-wrap gap-2.5 sm:w-auto">
+      <a href="{% url 'debat-nouveau' %}" class="inline-flex min-h-[46px] flex-1 items-center justify-center gap-2 rounded-[10px] border-[1.5px] border-navy bg-white px-[18px] font-bold text-navy hover:bg-navy-soft sm:flex-none">
+        <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+        Nouveau débat N°{{ prochain_numero }}
+      </a>
+      {% if u_actu %}
+      <a href="{{ u_actu }}#formulaire" class="inline-flex min-h-[46px] flex-1 items-center justify-center gap-2 rounded-[10px] bg-navy px-[18px] font-bold text-white hover:bg-navy-ink sm:flex-none">
+        <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Nouvelle actualité
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if messages %}
+  <div class="mb-5 grid gap-2" role="status">
+    {% for message in messages %}
+    <div class="flex items-center justify-between gap-3 rounded-[10px] border px-4 py-3 font-semibold {% if message.tags == 'success' %}border-[#BFE0CC] bg-ok-soft text-[#14532F]{% elif message.tags == 'error' %}border-[#F0D2CC] bg-rouge-soft text-[#7A2214]{% else %}border-ligne bg-white{% endif %}">
+      <span>{{ message }}</span>
+      <button type="button" aria-label="Fermer" onclick="this.parentNode.remove()" class="h-8 w-8 text-base">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Chiffres -->
+  <div class="mb-7 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3.5">
+    <a href="?" class="rounded-xl border border-ligne bg-white px-[18px] py-4 hover:border-navy">
+      <b class="block font-serif text-[30px] font-bold leading-tight text-navy">{{ stats.total }}</b>
+      <span class="text-gris">actualités{% if stats.sans_rubrique %} · {{ stats.sans_rubrique }} sans rubrique{% endif %}</span>
+    </a>
+    <a href="?statut=publiees" class="rounded-xl border border-ligne bg-white px-[18px] py-4 hover:border-navy">
+      <b class="block font-serif text-[30px] font-bold leading-tight text-ok">{{ stats.publiques }}</b>
+      <span class="text-gris">visibles sur le site</span>
+    </a>
+    <div class="rounded-xl border border-ligne bg-white px-[18px] py-4">
+      <b class="block font-serif text-[30px] font-bold leading-tight text-navy">{{ stats.rubriques }} · {{ stats.sous_rubriques }}</b>
+      <span class="text-gris">rubriques · sous-rubriques</span>
+    </div>
+    {% if en_cours %}
+    <a href="?debat={{ en_cours.pk }}" class="rounded-xl bg-navy px-[18px] py-4 hover:bg-navy-ink">
+      <b class="block font-serif text-[30px] font-bold leading-tight text-gold">N°{{ en_cours.numero }}</b>
+      <span class="text-[#D7DEEA]">débat en cours · {{ en_cours.nb }} contribution{{ en_cours.nb|pluralize }}</span>
+    </a>
+    {% else %}
+    <a href="{% url 'debat-nouveau' %}" class="rounded-xl bg-navy px-[18px] py-4 hover:bg-navy-ink">
+      <b class="block font-serif text-[30px] font-bold leading-tight text-gold">—</b>
+      <span class="text-[#D7DEEA]">aucun débat en cours</span>
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="flex flex-wrap items-start gap-6">
+
+    <!-- ═════════ COLONNE GAUCHE : classement ═════════ -->
+    <aside class="flex min-w-0 flex-[1_1_290px] flex-col gap-[18px]">
+
+      <section id="rubriques" aria-labelledby="t-rub" class="rounded-[14px] border border-ligne bg-white p-[18px]">
+        <div class="mb-3 flex items-center justify-between">
+          <h2 id="t-rub" class="font-serif text-[19px] font-bold text-navy">Rubriques</h2>
+          <span class="font-mono text-[11px] text-gris">{{ stats.rubriques }}</span>
+        </div>
+
+        <a href="?" class="flex min-h-11 items-center justify-between gap-2 rounded-[9px] border px-3 {% if not sel_rub and not sel_debat %}border-navy bg-navy-soft font-bold text-navy{% else %}border-transparent font-medium hover:bg-paper{% endif %}">
+          <span>Toutes les actualités</span><span class="font-mono text-xs">{{ stats.total }}</span>
+        </a>
+
+        <ul class="mt-1.5 flex flex-col gap-1">
+          {% for r in rubriques %}
+          <li>
+            <details open class="group">
+            <summary class="flex cursor-pointer list-none items-center gap-1 [&::-webkit-details-marker]:hidden">
+              <span class="grid h-11 w-7 flex-none place-items-center rounded-md text-gris hover:bg-paper" title="Afficher / masquer les sous-rubriques">
+                <svg class="h-4 w-4 -rotate-90 transition-transform group-open:rotate-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                <span class="sr-only">Sous-rubriques de {{ r.nom }}</span>
+              </span>
+              <a href="?rubrique={{ r.pk }}" class="flex min-h-11 min-w-0 flex-1 items-center justify-between gap-2 rounded-[9px] border px-3 {% if sel_rub == r.pk and not sel_sous %}border-navy bg-navy-soft font-bold text-navy{% else %}border-transparent font-medium hover:bg-paper{% endif %}">
+                <span class="flex min-w-0 items-center gap-2">
+                  <span aria-hidden="true" class="h-[9px] w-[9px] flex-none rounded-[3px] {% cycle 'bg-navy' 'bg-ok' 'bg-gold-ink' 'bg-rouge' %}"></span>
+                  <span class="truncate">{{ r.nom|default:"(sans nom)" }}</span>
+                </span>
+                <span class="flex-none font-mono text-xs">{{ r.nb }}</span>
+              </a>
+            </summary>
+
+            <ul class="mb-2 ml-[34px] mt-1 flex flex-col gap-1 border-l-2 border-ligne pl-3">
+              <li class="pb-0.5 font-mono text-[10px] font-bold uppercase tracking-[.12em] text-gris">{{ r.sous_liste|length }} sous-rubrique{{ r.sous_liste|length|pluralize }}</li>
+              {% for s in r.sous_liste %}
+              <li>
+                <a href="?sous_rubrique={{ s.pk }}" class="flex min-h-[38px] items-center justify-between gap-2 rounded-[9px] border px-3 text-[13px] {% if sel_sous == s.pk %}border-navy bg-navy-soft font-bold text-navy{% else %}border-transparent hover:bg-paper{% endif %}">
+                  <span>{{ s.nom|default:"(sans nom)" }}</span><span class="font-mono text-[11.5px]">{{ s.nb }}</span>
+                </a>
+              </li>
+              {% empty %}
+              <li class="py-1.5 text-[12.5px] text-gris">Aucune sous-rubrique pour l'instant.</li>
+              {% endfor %}
+              <li>
+                <form method="post" action="{% url 'gestion-sous-rubrique-ajouter' %}" class="mt-1 flex gap-1.5">
+                  {% csrf_token %}
+                  <input type="hidden" name="rubrique" value="{{ r.pk }}">
+                  <input type="hidden" name="suivant" value="{{ suivant }}">
+                  <label for="ns-{{ r.pk }}" class="sr-only">Nouvelle sous-rubrique dans {{ r.nom }}</label>
+                  <input id="ns-{{ r.pk }}" type="text" name="nom" maxlength="255" placeholder="+ Sous-rubrique" required class="min-h-[38px] min-w-0 flex-1 rounded-lg border-[1.5px] border-dashed border-[#CFC8B8] bg-[#FBFAF6] px-2.5 text-[13px] focus:border-navy focus:outline-none">
+                  <button type="submit" class="min-h-[38px] rounded-lg bg-navy-soft px-3 text-[13px] font-bold text-navy hover:bg-[#DCE5F2]">Ajouter</button>
+                </form>
+              </li>
+            </ul>
+            </details>
+          </li>
+          {% empty %}
+          <li class="py-1.5 text-[12.5px] text-gris">Aucune rubrique. Créez la première ci-dessous.</li>
+          {% endfor %}
+        </ul>
+
+        <form method="post" action="{% url 'gestion-rubrique-ajouter' %}" class="mt-3.5 flex gap-2 border-t border-ligne pt-3.5">
+          {% csrf_token %}
+          <input type="hidden" name="suivant" value="{{ suivant }}">
+          <label for="nouvelle-rubrique" class="sr-only">Nouvelle rubrique</label>
+          <input id="nouvelle-rubrique" type="text" name="nom" maxlength="255" placeholder="Nouvelle rubrique" required class="min-h-11 min-w-0 flex-1 rounded-[10px] border-[1.5px] border-ligne px-3 focus:border-navy focus:outline-none">
+          <button type="submit" class="min-h-11 rounded-[10px] bg-navy px-3.5 font-bold text-white hover:bg-navy-ink">Créer</button>
+        </form>
+      </section>
+
+      <section id="debats" aria-labelledby="t-deb" class="rounded-[14px] border border-ligne bg-white p-[18px]">
+        <div class="mb-3 flex items-center justify-between">
+          <h2 id="t-deb" class="font-serif text-[19px] font-bold text-navy">Débats numérotés</h2>
+          <a href="{% url 'debat-nouveau' %}" class="text-[13px] font-bold text-navy hover:underline">+ N°{{ prochain_numero }}</a>
+        </div>
+        <ul class="flex flex-col gap-2">
+          {% for d in debats %}
+          <li>
+            <a href="?debat={{ d.pk }}" class="flex items-start gap-3 rounded-[10px] border px-3 py-2.5 {% if sel_debat == d.pk %}border-navy bg-navy-soft{% else %}border-ligne bg-white hover:border-navy{% endif %}">
+              <span class="min-w-[52px] flex-none rounded-[7px] px-1 py-1.5 text-center font-mono text-[13px] font-bold {% if d.statut == 'en_cours' %}bg-navy text-gold{% elif d.statut == 'cloture' %}bg-[#FBF1DA] text-gold-ink{% else %}bg-[#EEF0F3] text-gris{% endif %}">N°{{ d.numero }}</span>
+              <span class="min-w-0">
+                <b class="block text-[13px] font-semibold leading-snug">{{ d.theme }}</b>
+                <small class="mt-1 flex flex-wrap gap-2 text-xs text-gris">
+                  <span class="font-bold {% if d.statut == 'en_cours' %}text-ok{% elif d.statut == 'cloture' %}text-gold-ink{% else %}text-gris{% endif %}">{{ d.get_statut_display }}</span>
+                  <span>{{ d.nb }} contrib.</span>
+                  {% if not d.is_public %}<span>· non publié</span>{% endif %}
+                </small>
+              </span>
+            </a>
+          </li>
+          {% empty %}
+          <li class="text-[12.5px] text-gris">Aucun débat. <a href="{% url 'debat-nouveau' %}" class="font-semibold text-navy underline">Créer le débat N°1</a></li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="rounded-[14px] border border-[#EBD7A3] bg-gold-soft px-[18px] py-4">
+        <span class="font-mono text-[10.5px] font-bold uppercase tracking-[.12em] text-gold-ink">Lien OPERAPLUS</span>
+        <p class="mt-1.5 text-[13px] leading-relaxed">Les débats clôturés peuvent alimenter la bibliothèque d'apprentissage d'OPERAPLUS (leçons apprises, bonnes pratiques MEAL).</p>
+      </section>
+    </aside>
+
+    <!-- ═════════ COLONNE DROITE : liste ═════════ -->
+    <section aria-labelledby="t-liste" class="flex min-w-0 flex-[999_1_560px] flex-col gap-[18px]">
+
+      {% if debat_choisi %}
+      <div class="flex flex-wrap items-center gap-x-7 gap-y-4 rounded-[14px] bg-navy px-6 py-[22px] text-white">
+        <div class="font-serif text-[42px] font-bold leading-none text-gold sm:text-[54px]">N°{{ debat_choisi.numero }}</div>
+        <div class="min-w-0 flex-[1_1_320px]">
+          <span class="font-mono text-[10.5px] font-bold uppercase tracking-[.14em] text-gold">Débat · {{ debat_choisi.get_statut_display }}{% if not debat_choisi.is_public %} · non publié{% endif %}</span>
+          <p class="mt-1.5 font-serif text-[22px] font-semibold leading-snug">{{ debat_choisi.theme }}</p>
+          <small class="mt-1.5 block text-[13px] text-[#D7DEEA]">
+            {% if debat_choisi.date_ouverture %}Du {{ debat_choisi.date_ouverture|date:"j M Y" }}{% endif %}{% if debat_choisi.date_cloture %} au {{ debat_choisi.date_cloture|date:"j M Y" }}{% endif %}{% if debat_choisi.date_ouverture or debat_choisi.date_cloture %} · {% endif %}{{ debat_choisi.nb }} contribution{{ debat_choisi.nb|pluralize }}
+          </small>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="{% url 'debat-modifier' debat_choisi.pk %}" class="inline-flex min-h-11 items-center rounded-[10px] bg-gold px-4 font-bold text-navy-ink hover:bg-[#EDC260]">Modifier le débat</a>
+          <a href="?" class="inline-flex min-h-11 items-center rounded-[10px] border-[1.5px] border-white/45 px-4 font-semibold text-white hover:bg-white/10">Retirer le filtre</a>
+        </div>
+      </div>
+      {% endif %}
+
+      <div id="liste" class="overflow-hidden rounded-[14px] border border-ligne bg-white">
+        <div class="flex flex-wrap items-center gap-3 border-b border-ligne px-[18px] py-4">
+          <h2 id="t-liste" class="flex-[1_1_200px] font-serif text-[19px] font-bold text-navy">{{ titre_liste }} <span class="font-mono text-[11px] font-medium text-gris">· {{ actualites|length }}</span></h2>
+          <form method="get" role="search" class="flex flex-[1_1_360px] flex-wrap justify-end gap-2">
+            {% if sel_debat %}<input type="hidden" name="debat" value="{{ sel_debat }}">
+            {% elif sel_sous %}<input type="hidden" name="sous_rubrique" value="{{ sel_sous }}">
+            {% elif sel_rub %}<input type="hidden" name="rubrique" value="{{ sel_rub }}">{% endif %}
+            <label for="q" class="sr-only">Rechercher</label>
+            <input id="q" type="search" name="q" value="{{ recherche }}" placeholder="Rechercher un titre…" class="min-h-[42px] min-w-0 flex-[1_1_200px] rounded-[10px] border-[1.5px] border-ligne px-3 focus:border-navy focus:outline-none">
+            <label for="statut" class="sr-only">Statut</label>
+            <select id="statut" name="statut" onchange="this.form.submit()" class="min-h-[42px] rounded-[10px] border-[1.5px] border-ligne bg-white px-3 font-semibold">
+              <option value="">Tous les statuts</option>
+              <option value="publiees"{% if statut == "publiees" %} selected{% endif %}>Visibles sur le site</option>
+              <option value="privees"{% if statut == "privees" %} selected{% endif %}>Non publiées</option>
+            </select>
+            <button type="submit" class="min-h-[42px] rounded-[10px] bg-navy-soft px-3.5 font-bold text-navy hover:bg-[#DCE5F2]">Filtrer</button>
+          </form>
+        </div>
+
+        {% if actualites %}
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[760px] border-collapse">
+            <thead>
+              <tr class="bg-[#FBFAF6] text-left font-mono text-[10.5px] uppercase tracking-[.1em] text-gris">
+                <th scope="col" class="py-3 pl-[18px] pr-2.5 font-bold">Actualité</th>
+                <th scope="col" class="px-2.5 py-3 font-bold">Débat</th>
+                <th scope="col" class="px-2.5 py-3 font-bold">Date</th>
+                <th scope="col" class="px-2.5 py-3 font-bold">Statut</th>
+                <th scope="col" class="py-3 pl-2.5 pr-[18px] text-right font-bold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in actualites %}
+              {% url 'admin-actualite-supprimer' a.pk as u_sup %}
+              <tr id="ligne-{{ a.pk }}" class="border-t border-[#EFEBE2] align-top hover:bg-[#FCFBF8]">
+                <td class="py-3.5 pl-[18px] pr-2.5">
+                  <div class="mb-1.5 flex flex-wrap gap-1.5">
+                    {% if a.rubrique %}<a href="?rubrique={{ a.rubrique_id }}" class="bg-gold px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[.1em] text-navy-ink">{{ a.rubrique.nom }}</a>{% else %}<span class="bg-[#EEF0F3] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[.1em] text-gris">Sans rubrique</span>{% endif %}
+                    {% if a.sous_rubrique %}<a href="?sous_rubrique={{ a.sous_rubrique_id }}" class="bg-navy-soft px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[.1em] text-navy">{{ a.sous_rubrique.nom }}</a>{% endif %}
+                  </div>
+                  <a href="{% if u_actu %}{{ u_actu }}?modifier={{ a.pk }}#formulaire{% else %}#{% endif %}" class="font-bold leading-snug text-encre hover:underline">{{ a.intitule|default:"Sans titre" }}</a>
+                  <div class="mt-1 text-xs text-gris">{{ a.nb_connexes }} article{{ a.nb_connexes|pluralize }} connexe{{ a.nb_connexes|pluralize }}</div>
+                </td>
+                <td class="px-2.5 py-3.5">
+                  {% if a.debat %}<a href="?debat={{ a.debat_id }}" title="{{ a.debat.theme }}" class="inline-block rounded-md bg-navy px-2.5 py-1.5 font-mono text-xs font-bold text-gold">N°{{ a.debat.numero }}</a>{% else %}<span class="text-gris">—</span>{% endif %}
+                </td>
+                <td class="whitespace-nowrap px-2.5 py-3.5 text-gris">{{ a.date|date:"j M Y"|default:"—" }}</td>
+                <td class="px-2.5 py-3.5">
+                  {% if a.is_public %}<span class="inline-block rounded-full bg-ok-soft px-2.5 py-1 text-xs font-bold text-ok">Visible</span>{% else %}<span class="inline-block rounded-full bg-warn-soft px-2.5 py-1 text-xs font-bold text-warn">Non publiée</span>{% endif %}
+                </td>
+                <td class="whitespace-nowrap py-2.5 pl-2.5 pr-[18px] text-right">
+                  <div class="inline-flex gap-1.5">
+                    <form method="post" action="{% url 'gestion-actualite-basculer' a.pk %}">
+                      {% csrf_token %}<input type="hidden" name="suivant" value="{{ suivant }}#ligne-{{ a.pk }}">
+                      <button type="submit" aria-label="{% if a.is_public %}Masquer du site{% else %}Publier sur le site{% endif %}" title="{% if a.is_public %}Masquer du site{% else %}Publier sur le site{% endif %}" class="grid h-10 w-10 place-items-center rounded-[9px] border border-ligne bg-white hover:bg-navy-soft {% if a.is_public %}text-ok{% else %}text-navy{% endif %}">
+                        <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>{% if not a.is_public %}<path d="M3 3l18 18"/>{% endif %}</svg>
+                      </button>
+                    </form>
+                    {% if u_actu %}
+                    <a href="{{ u_actu }}?modifier={{ a.pk }}#formulaire" aria-label="Modifier" title="Modifier" class="grid h-10 w-10 place-items-center rounded-[9px] border border-ligne bg-white text-navy hover:bg-navy-soft">
+                      <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/></svg>
+                    </a>
+                    {% endif %}
+                    {% if u_sup %}
+                    <form method="post" action="{{ u_sup }}" onsubmit="return confirm('Supprimer définitivement « {{ a.intitule|escapejs }} » ?')">
+                      {% csrf_token %}
+                      <button type="submit" aria-label="Supprimer" title="Supprimer" class="grid h-10 w-10 place-items-center rounded-[9px] border border-[#F0D2CC] bg-white text-rouge hover:bg-rouge-soft">
+                        <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="px-[18px] py-8 text-center text-gris">
+          {% if recherche or statut %}Aucune actualité ne correspond à ce filtre.
+          {% elif debat_choisi %}Aucune contribution pour l'instant. <a href="{% url 'debat-modifier' debat_choisi.pk %}#contributions" class="font-semibold text-navy underline">Rattacher des actualités au débat N°{{ debat_choisi.numero }}</a>
+          {% else %}Aucune actualité dans ce classement pour l'instant.{% endif %}
+        </p>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</main>
+</body>
+</html>

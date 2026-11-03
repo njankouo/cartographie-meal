@@ -1166,3 +1166,12 @@ def ProfilExpertPublic(request, token):
 
  
   return render(request, 'webpages/profil-expert-public.html', context)
+
+
+
+def DebatNouveau(request):
+    return render(request, 'webpages/actualites/debat.html')
+
+
+def add_rubrique(request):
+    pass

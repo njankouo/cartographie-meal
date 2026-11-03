@@ -60,7 +60,11 @@ urlpatterns = [
 
     path('zone-intervention/', views.zone_intervention, name='zone-intervention'),
 
-    path('expert/partage/<uuid:token>/', views.ProfilExpertPublic, name='profil_expert_public')
+    path('expert/partage/<uuid:token>/', views.ProfilExpertPublic, name='profil_expert_public'),
+
+    path('debat-nouveau/', views.DebatNouveau, name='debat-nouveau'),
+
+    path('gestion-rubrique-ajouter/', views.add_rubrique, name='gestion-rubrique-ajouter')
 
 
 ]
