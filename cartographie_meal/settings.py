@@ -23,7 +23,7 @@ load_dotenv(BASE_DIR / '.env')
 # Initialisation de environ
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = os.getenv('SECRET_KEY')
 CSRF_TRUSTED_ORIGINS = [
     'https://meal-afrique.operaplus.org',
