@@ -144,7 +144,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 CITIES_LIGHT_TRANSLATION_LANGUAGES = ['fr', 'en']
 
 # Celery Configuration (Corrigé pour pointer vers le conteneur Redis Docker)
-#CELERY_BROKER_URL = "redis://meal-afrique-app-redis:6379/0"
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BROKER_URL = "redis://meal-afrique-app-redis:6379/0"
+#CELERY_BROKER_URL = "redis://localhost:6379/0"
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
